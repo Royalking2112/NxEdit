@@ -1,287 +1,50 @@
-/* 1. VARIABLES & RESET */
-:root {
-    --bg-dark: #121212;       /* Main canvas background */
-    --panel-bg: #1d1e22;      /* Sidebar background */
-    --border-color: #2f3035;  /* Subtle dividers */
-    --accent-color: #00d1d1;  /* CapCut Cyan */
-    --text-main: #ffffff;
-    --text-muted: #8a8a8a;
-    --track-video: #3b82f6;   /* Blue for video clips */
-    --track-audio: #10b981;   /* Green for audio clips */
-}
+/* canvas-engine.css */
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-body { 
-    font-family: 'Inter', sans-serif; 
-    background: var(--bg-dark); 
-    color: var(--text-main); 
-    height: 100vh; 
-    overflow: hidden; 
-}
-
-/* 2. LAYOUT GRID */
-.app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.workspace {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-/* 3. TOP BAR */
-.top-bar {
-    height: 50px;
-    background: var(--panel-bg);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-}
-.btn-primary {
-    background: var(--accent-color);
-    color: #000;
-    border: none;
-    padding: 6px 16px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* 4. SIDEBARS */
-.sidebar-left {
-    width: 320px;
-    background: var(--panel-bg);
-    display: flex;
-    border-right: 1px solid var(--border-color);
-}
-.resource-nav {
-    width: 70px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
-    border-right: 1px solid var(--border-color);
-}
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 24px;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 0.8rem;
-    gap: 5px;
-}
-.nav-item.active, .nav-item:hover { color: var(--text-main); }
-.nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
-
-.resource-panel { flex: 1; padding: 15px; }
-.media-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 15px;
-}
-.media-item {
-    height: 80px;
-    background-color: #333;
-    border-radius: 4px;
-    position: relative;
-    cursor: grab;
-}
-.media-item span {
-    position: absolute;
-    bottom: 4px; right: 4px;
-    font-size: 10px;
-    background: rgba(0,0,0,0.7);
-    padding: 2px 4px;
-    border-radius: 2px;
-}
-
-/* 5. CENTER STAGE */
-.center-stage {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0; /* Prevent grid blowout */
-}
-
-/* Preview Area */
-.preview-area {
-    flex: 1.5; /* Takes up 60% of vertical space */
-    background: #161618;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-.video-canvas {
+/* 1. The Stage */
+.canvas-container {
     width: 60%;
     aspect-ratio: 16/9;
     background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #444;
-}
-.player-controls {
-    width: 100%;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    margin-top: 10px;
-}
-.play-btn { font-size: 1.5rem; color: var(--text-main); margin: 0 15px; cursor: pointer; }
-
-/* Timeline Area */
-.timeline-area {
-    flex: 1; /* Takes up 40% of vertical space */
-    background: var(--panel-bg);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-}
-
-.timeline-toolbar {
-    height: 40px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    gap: 10px;
-}
-.tool-btn {
-    background: none;
-    border: none;
-    color: var(--text-main);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.tool-btn:hover { background: rgba(255,255,255,0.1); }
-.tool-divider { width: 1px; height: 20px; background: var(--border-color); margin: 0 5px; }
-
-.timeline-tracks {
-    flex: 1;
-    overflow-x: auto;
-    overflow-y: scroll;
-    position: relative;
-    padding: 20px 0;
-}
-.time-ruler {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 10px 5px 60px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    margin-bottom: 10px;
-}
-.track-row {
-    height: 50px;
-    display: flex;
-    margin-bottom: 5px;
-    position: relative;
-}
-.track-header {
-    width: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-right: 1px solid var(--border-color);
-    color: var(--text-muted);
-}
-.track-content {
-    flex: 1;
-    position: relative;
-    background: rgba(255,255,255,0.02);
-}
-.clip {
-    position: absolute;
-    height: 100%;
-    border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.2);
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    font-size: 0.8rem;
+    position: relative; /* Anchor for absolute children */
     overflow: hidden;
-    cursor: pointer;
-}
-.video-clip { background: var(--track-video); }
-.audio-clip { background: var(--track-audio); height: 70%; top: 15%; }
-
-.playhead {
-    position: absolute;
-    top: 0; bottom: 0; left: 150px; /* Logic controlled by JS */
-    width: 2px;
-    background: var(--accent-color);
-    z-index: 10;
-}
-.playhead::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -6px;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-top: 10px solid var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* 6. RIGHT SIDEBAR */
-.sidebar-right {
-    width: 280px;
-    background: var(--panel-bg);
-    border-left: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
+/* 2. The Video Object */
+#main-video {
+    max-width: 100%;
+    max-height: 100%;
+    /* Vital for smooth scaling */
+    transition: transform 0.1s linear, filter 0.2s ease; 
+    will-change: transform, filter;
 }
-.property-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
+
+/* 3. Interactive Text Overlays */
+.overlay-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2rem;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    border: 2px solid transparent;
+    cursor: grab;
+    user-select: none;
 }
-.tab {
-    flex: 1;
-    text-align: center;
-    padding: 12px 0;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    cursor: pointer;
+
+/* Active State (Like selecting text in CapCut) */
+.overlay-text.active {
+    border: 2px solid var(--accent-color);
+    background: rgba(0, 209, 209, 0.1);
 }
-.tab.active {
-    color: var(--text-main);
-    border-bottom: 2px solid var(--text-main);
-}
-.property-content { padding: 20px; }
-.prop-group { margin-bottom: 20px; }
-.prop-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 0.85rem;
-}
-.prop-slider {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 4px;
-    background: #444;
-    border-radius: 2px;
-}
-.prop-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px; height: 12px;
-    background: var(--text-main);
-    border-radius: 50%;
-    cursor: pointer;
+.overlay-text.active::after {
+    content: '●'; /* Resize Handle Simulation */
+    position: absolute;
+    bottom: -6px; right: -6px;
+    color: var(--accent-color);
+    font-size: 12px;
 }
