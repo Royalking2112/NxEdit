@@ -1,27 +1,183 @@
-<!-- UPDATE: Replace the .preview-area in the previous HTML with this Active Engine -->
-<div class="preview-area">
-    <!-- 1. Canvas Container (Holds Video + Text Layers) -->
-    <div class="canvas-container" id="canvas-root">
-        <video id="main-video" src="" loop playsinline></video>
-        
-        <!-- Text Layers will be injected here via JS -->
-        <div id="overlay-layer"></div>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapCut Web Clone</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. TOP NAVIGATION -->
+        <header class="top-bar">
+            <div class="logo-section">
+                <i class="fas fa-scissors brand-icon"></i>
+                <span class="project-name">Untitled Project</span>
+            </div>
+            <div class="export-section">
+                <button class="btn-secondary">1080p <i class="fas fa-chevron-down"></i></button>
+                <button class="btn-primary" id="export-btn">Export</button>
+            </div>
+        </header>
 
-    <!-- 2. Hidden Input for Real File Loading -->
-    <input type="file" id="file-upload" accept="video/*" hidden>
-    
-    <!-- 3. Active Controls -->
-    <div class="player-controls">
-        <span class="time-code" id="time-display">00:00 / 00:00</span>
-        <div class="control-buttons">
-            <i class="fas fa-step-backward" onclick="seek(-5)"></i>
-            <!-- The ID is crucial for the JS toggle -->
-            <i class="fas fa-play-circle play-btn" id="play-toggle"></i>
-            <i class="fas fa-step-forward" onclick="seek(5)"></i>
+        <div class="workspace">
+            <!-- 2. LEFT SIDEBAR (TOOLS) -->
+            <aside class="sidebar-left">
+                <nav class="resource-nav">
+                    <div class="nav-item active" data-tool="media"><i class="fas fa-photo-video"></i><small>Media</small></div>
+                    <div class="nav-item" data-tool="audio"><i class="fas fa-music"></i><small>Audio</small></div>
+                    <!-- Added onclick to trigger Text Layer -->
+                    <div class="nav-item" id="add-text-btn"><i class="fas fa-font"></i><small>Text</small></div>
+                    <div class="nav-item"><i class="far fa-laugh-beam"></i><small>Stickers</small></div>
+                    <div class="nav-item"><i class="fas fa-magic"></i><small>Effects</small></div>
+                    <div class="nav-item"><i class="fas fa-sliders-h"></i><small>Filters</small></div>
+                </nav>
+                
+                <!-- Dynamic Resource Panel -->
+                <div class="resource-panel">
+                    <div class="panel-header">
+                        <h3>Local Media</h3>
+                        <!-- Hidden Input for File Upload -->
+                        <input type="file" id="file-upload" accept="video/*" hidden>
+                        <button class="btn-icon" onclick="document.getElementById('file-upload').click()">
+                            <i class="fas fa-plus"></i> Import
+                        </button>
+                    </div>
+                    <div class="media-grid">
+                        <div class="media-item" style="background: linear-gradient(45deg, #333, #444)"><span>00:15</span></div>
+                        <div class="media-item" style="background: linear-gradient(45deg, #444, #555)"><span>00:30</span></div>
+                        <div class="media-item" style="background: linear-gradient(45deg, #222, #333)"><span>01:05</span></div>
+                    </div>
+                    <div class="panel-info">
+                        <p>Supported: MP4, MOV, WebM</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 3. CENTER STAGE (CANVAS) -->
+            <main class="center-stage">
+                <div class="preview-area">
+                    <!-- THE ACTIVE CANVAS -->
+                    <div class="canvas-container" id="canvas-root">
+                        <video id="main-video" loop playsinline poster="https://placehold.co/1920x1080/000/444?text=Upload+Video"></video>
+                        <!-- Text layers injected here -->
+                        <div id="overlay-layer"></div>
+                    </div>
+
+                    <!-- PLAYER CONTROLS -->
+                    <div class="player-controls">
+                        <span class="time-code" id="time-display">00:00 / 00:00</span>
+                        <div class="control-buttons">
+                            <i class="fas fa-step-backward" id="btn-prev"></i>
+                            <i class="fas fa-play-circle play-btn" id="play-toggle"></i>
+                            <i class="fas fa-step-forward" id="btn-next"></i>
+                        </div>
+                        <div class="zoom-controls">
+                            <i class="fas fa-minus"></i>
+                            <input type="range" class="zoom-slider" min="10" max="200" value="100">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIMELINE AREA -->
+                <div class="timeline-area">
+                    <div class="timeline-toolbar">
+                        <div class="tool-group">
+                            <button class="tool-btn" title="Undo"><i class="fas fa-undo"></i></button>
+                            <button class="tool-btn" title="Redo"><i class="fas fa-redo"></i></button>
+                        </div>
+                        <div class="tool-divider"></div>
+                        <div class="tool-group">
+                            <button class="tool-btn"><i class="fas fa-cut"></i> Split</button>
+                            <button class="tool-btn"><i class="fas fa-trash-alt"></i> Delete</button>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-tracks">
+                        <div class="time-ruler">
+                            <span>00:00</span><span>00:05</span><span>00:10</span><span>00:15</span><span>00:20</span>
+                        </div>
+                        <!-- Active Video Track -->
+                        <div class="track-row">
+                            <div class="track-header"><i class="fas fa-video"></i></div>
+                            <div class="track-content" id="video-track">
+                                <!-- Clip visual will be added here via JS -->
+                                <div class="clip video-clip" style="width: 100%; left: 0;">Main_Track.mp4</div>
+                            </div>
+                        </div>
+                        <!-- Playhead -->
+                        <div class="playhead" id="playhead"></div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- 4. RIGHT SIDEBAR (PROPERTIES) -->
+            <aside class="sidebar-right">
+                <div class="property-tabs">
+                    <div class="tab active">Video</div>
+                    <div class="tab">Audio</div>
+                    <div class="tab">Anim</div>
+                </div>
+                <div class="property-content">
+                    <!-- Transform Controls -->
+                    <div class="prop-group">
+                        <div class="prop-header">
+                            <span>Scale</span>
+                            <span class="value-display">100%</span>
+                        </div>
+                        <!-- Data-prop connects to JS state -->
+                        <input type="range" min="10" max="200" value="100" class="prop-slider" data-prop="scale">
+                    </div>
+                    
+                    <div class="prop-group">
+                        <div class="prop-header">
+                            <span>Position X</span>
+                            <span class="value-display">0</span>
+                        </div>
+                        <input type="range" min="-500" max="500" value="0" class="prop-slider" data-prop="posX">
+                    </div>
+
+                    <div class="prop-group">
+                        <div class="prop-header">
+                            <span>Position Y</span>
+                            <span class="value-display">0</span>
+                        </div>
+                        <input type="range" min="-300" max="300" value="0" class="prop-slider" data-prop="posY">
+                    </div>
+
+                    <div class="prop-group">
+                        <div class="prop-header">
+                            <span>Rotation</span>
+                            <span class="value-display">0°</span>
+                        </div>
+                        <input type="range" min="0" max="360" value="0" class="prop-slider" data-prop="rotation">
+                    </div>
+                    
+                    <!-- Opacity -->
+                    <div class="prop-group border-top">
+                        <div class="prop-header">
+                            <span>Opacity</span>
+                            <span class="value-display">100%</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="100" class="prop-slider" data-prop="opacity">
+                    </div>
+                    
+                    <!-- Blend Mode Simulation -->
+                    <div class="prop-group">
+                         <div class="prop-header"><span>Blend Mode</span></div>
+                         <select class="prop-select" id="blend-mode">
+                             <option value="normal">Normal</option>
+                             <option value="screen">Screen</option>
+                             <option value="multiply">Multiply</option>
+                             <option value="overlay">Overlay</option>
+                         </select>
+                    </div>
+                </div>
+            </aside>
         </div>
-        <button class="btn-secondary" onclick="document.getElementById('file-upload').click()">
-            <i class="fas fa-upload"></i> Load Video
-        </button>
     </div>
-</div>
+    <script src="script.js"></script>
+</body>
+</html>
